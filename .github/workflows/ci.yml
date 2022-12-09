@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+    - name: Setup .NET versions
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          7.0.x
+    - name: Dump .NET info
+      run: dotnet --info
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build source code
+      run: dotnet build --configuration Release --no-restore
+    - name: Test with dotnet
+      run: dotnet test --configuration Release --no-build
+    - name: Check source file format
+      run: dotnet format --no-restore --verify-no-changes
